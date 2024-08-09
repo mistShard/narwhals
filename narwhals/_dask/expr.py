@@ -4,6 +4,7 @@ from copy import copy
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
+from typing import NoReturn
 
 from narwhals.dependencies import get_dask
 
@@ -418,6 +419,39 @@ class DaskExpr:
             "round",
             decimals,
             returns_scalar=False,
+        )
+
+    def drop_nulls(self) -> NoReturn:
+        # We can't (yet?) allow methods which modify the index
+        msg = "`Expr.drop_nulls` is not supported for the Dask backend. Please use `LazyFrame.drop_nulls` instead."
+        raise NotImplementedError(msg)
+
+    def sort(self, *, descending: bool = False, nulls_last: bool = False) -> NoReturn:
+        # We can't (yet?) allow methods which modify the index
+        msg = "`Expr.sort` is not supported for the Dask backend. Please use `LazyFrame.sort` instead."
+        raise NotImplementedError(msg)
+
+    def abs(self) -> Self:
+        return self._from_call(
+            lambda _input: _input.abs(),
+            "abs",
+            returns_scalar=False,
+        )
+
+    def all(self) -> Self:
+        return self._from_call(
+            lambda _input: _input.all(
+                axis=None, skipna=True, split_every=False, out=None
+            ),
+            "all",
+            returns_scalar=True,
+        )
+
+    def any(self) -> Self:
+        return self._from_call(
+            lambda _input: _input.any(axis=0, skipna=True, split_every=False),
+            "any",
+            returns_scalar=True,
         )
 
     def fill_null(self, value: Any) -> DaskExpr:
